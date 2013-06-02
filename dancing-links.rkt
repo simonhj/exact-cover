@@ -18,11 +18,11 @@
 
 ;; Matrix rep of exact cover -> dancing links datastructure
 ;; Expected structure #[ #[header strings] #[row1] #[row2] ... #[rowN] ]
-(define (build-dl array)
-  (define get ((curry get-from-table) array))
-  (define (count-1s c)
-    (for/sum ([row array])
-      (let ([val (vector-ref row c)])
+(define (build-dl get size-rows size-columns)
+;  (define get ((curry get-from-table) array))
+  (define (count-1s y)
+    (for/sum ([x (in-range size-rows)])
+      (let ([val (get x y)])
 	(if (number? val) val 0))))
   (define (connect-lr l r)
     (set-data-right! l r)
@@ -32,10 +32,8 @@
     (set-data-down! u d))
   (let* ([dummy (chead -1 -2 -3 -4 -5 -6 "dummy")]
 	 [h (chead dummy dummy dummy dummy dummy dummy "h")]
-	 [size-columns (vector-length array)]
-	 [size-rows (vector-length (vector-ref array 0))]
-	 [headers (for/vector ([s (vector-ref array 0)])
-		    (chead 0 0 0 0 0 0 s))]
+	 [headers (for/vector ([x (in-range size-columns)])
+		    (chead 0 0 0 0 0 0 (get x 0)))]
 	 [made (make-hash)])		; table idx cons -> dl object
     (define (walk-up x y)		; will hit column header evetually, no wrap around
       (let/cc return
