@@ -75,7 +75,7 @@
         (let ([val (get x y)])
           (cond
 	   [(equal? val 0) null]
-	   [(equal? val 1) (let ([ob (data 0 0 0 0 (hash-ref made (cons x 0)) x)])
+	   [(equal? val 1) (let ([ob (data 0 0 0 0 (hash-ref made (cons x 0)) y)])
 			     (hash-set! made (cons x y) ob)
 			     (set-data-down! ob (hash-ref made (cons x 0)))
 			     (set-data-right! ob ob)
@@ -135,14 +135,6 @@
 (define (dlx instance)
   (let ([h (dl-h instance)]
         [headers (dl-headers instance)])
-    (define (solution O)
-      (displayln ">solution")
-      (for ([o O])
-        (display (chead-name (data-column o)))
-        (for ([x (right o)])
-          (display (chead-name (data-column x))))
-        (displayln ""))
-      (displayln "<solution"))
     (define (choose-column)		; Not pretty...
       (let ([min (data-right h)])
         (for ([he (right h)])
@@ -151,7 +143,7 @@
         min))
     (define (search k O)
       (if (eq? (data-right h) h)
-          (solution (reverse O))
+          (yield (map data-row-idx O))
           (let ([c (data-right h)])
             (cover c)
             (for ([r (down c)])
@@ -162,7 +154,8 @@
               (for ([j (left r)])
                 (uncover (data-column j))))
             (uncover c))))
-    (search 0 (list))))
+    (generator ()
+      (search 0 (list)))))
 
 ;; Tests
 
