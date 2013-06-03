@@ -8,7 +8,7 @@
 ;; Source: http://arxiv.org/pdf/cs/0011047v1.pdf 
 ;; Author: Simon Holm Jensen <simon@hjensen.net>
 
-(struct data (left right up down column) #:mutable)
+(struct data (left right up down column row-idx) #:mutable)
 (struct chead data (size name) #:mutable)
 (struct dl (h headers))
 
@@ -30,10 +30,10 @@
   (define (connect-du d u)
     (set-data-up! d u)
     (set-data-down! u d))
-  (let* ([dummy (chead -1 -2 -3 -4 -5 -6 "dummy")]
-	 [h (chead dummy dummy dummy dummy dummy dummy "h")]
+  (let* ([dummy (chead -1 -2 -3 -4 -5 -6 -7 "dummy")]
+	 [h (chead dummy dummy dummy dummy dummy dummy dummy "h")]
 	 [headers (for/vector ([x (in-range size-columns)])
-		    (chead 0 0 0 0 0 0 (get x 0)))]
+		    (chead 0 0 0 0 0 0 0 (get x 0)))]
 	 [made (make-hash)])		; table idx cons -> dl object
     (define (walk-up x y)		; will hit column header evetually, no wrap around
       (let/cc return
@@ -75,7 +75,7 @@
         (let ([val (get x y)])
           (cond
 	   [(equal? val 0) null]
-	   [(equal? val 1) (let ([ob (data 0 0 0 0 (hash-ref made (cons x 0)))])
+	   [(equal? val 1) (let ([ob (data 0 0 0 0 (hash-ref made (cons x 0)) x)])
 			     (hash-set! made (cons x y) ob)
 			     (set-data-down! ob (hash-ref made (cons x 0)))
 			     (set-data-right! ob ob)
@@ -182,4 +182,3 @@
     #['A 'B]
     #[1   0]
     #[0   1]])
-
