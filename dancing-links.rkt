@@ -1,5 +1,10 @@
 #lang racket
 
+(provide 
+ get-from-table
+ build-dl
+ dlx)
+
 (require racket/generator)
 
 ;; Implementation of Knuth's dancing links algorithm for solving the
@@ -19,9 +24,8 @@
 ;; Matrix rep of exact cover -> dancing links datastructure
 ;; Expected structure #[ #[header strings] #[row1] #[row2] ... #[rowN] ]
 (define (build-dl get size-rows size-columns)
-;  (define get ((curry get-from-table) array))
   (define (count-1s y)
-    (for/sum ([x (in-range size-rows)])
+    (for/sum ([x (in-range size-columns)])
       (let ([val (get x y)])
 	(if (number? val) val 0))))
   (define (connect-lr l r)
@@ -37,41 +41,41 @@
 	 [made (make-hash)])		; table idx cons -> dl object
     (define (walk-up x y)		; will hit column header evetually, no wrap around
       (let/cc return
-        (for ([i (in-range 1 (add1 size-columns))])
-          (let ([p (cons x (modulo (- y i) size-columns))])
+        (for ([i (in-range 1 (add1 size-rows))])
+          (let ([p (cons x (modulo (- y i) size-rows))])
             (if (hash-has-key? made p)
                 (return (hash-ref made p))
                 0)))
         (raise exn:fail)))
     (define (walk-left x y)
       (let/cc return
-        (for ([i (in-range 1 (add1 size-rows))])
-          (let ([p (cons (modulo (- x i) size-rows) y)]) ;Possible wrap around
+        (for ([i (in-range 1 (add1 size-columns))])
+          (let ([p (cons (modulo (- x i) size-columns) y)]) ;Possible wrap around
             (if (hash-has-key? made p)
                 (return (hash-ref made p))
                 0)))
         (raise exn:fail)))
     (define (walk-right x y)
       (let/cc return
-        (for ([i (in-range 1 (add1 size-rows))])
-          (let ([p (cons (modulo (+ x i) size-rows) y)]) ;Possible wrap around
+        (for ([i (in-range 1 (add1 size-columns))])
+          (let ([p (cons (modulo (+ x i) size-columns) y)]) ;Possible wrap around
             (if (hash-has-key? made p)
                 (return (hash-ref made p))
                 0)))
         (raise exn:fail)))
     ;; Set the left, right and column links in the headers and set
     ;; initial sizes
-    (for ([i (in-range size-rows)])
+    (for ([i (in-range size-columns)])
       (let ([curr (vector-ref headers i)])
-        (set-data-left! curr (vector-ref headers (modulo (sub1 i) size-rows)))
-        (set-data-right! curr (vector-ref headers (modulo (add1 i) size-rows)))
+        (set-data-left! curr (vector-ref headers (modulo (sub1 i) size-columns)))
+        (set-data-right! curr (vector-ref headers (modulo (add1 i) size-columns)))
         (set-data-column! curr curr)
         (set-chead-size! curr (count-1s i))
         (hash-set! made (cons i 0) curr)))
     (connect-lr h (vector-ref headers 0))
-    (connect-lr (vector-ref headers (- size-rows 1)) h)
-    (for ([y (in-range 1 size-columns)])		;Skip the header
-      (for ([x (in-range size-rows)])
+    (connect-lr (vector-ref headers (- size-columns 1)) h)
+    (for ([y (in-range 1 size-rows)])		;Skip the header
+      (for ([x (in-range size-columns)])
         (let ([val (get x y)])
           (cond
 	   [(equal? val 0) null]
@@ -82,14 +86,14 @@
 			     (connect-lr (walk-left x y) ob)
 			     (connect-du ob (walk-up x y)))]
 	   [else (raise exn:fail)])))
-      (let ([p (cons (- size-rows 1)  y)]) ;Set wrap around pointer.
+      (let ([p (cons (- size-columns 1) y)]) ;Set wrap around pointer.
 	(if (hash-has-key? made p)
 	    (connect-lr (hash-ref made p) (walk-right (car p) (cdr p)))
 	    (connect-lr (walk-left (car p) (cdr p)) (walk-right (car p) (cdr p))))))
     ;; Connect up pointers for column headers
-    (for ([i (in-range size-rows)])
+    (for ([i (in-range size-columns)])
       (let ([c (vector-ref headers i)])
-        (connect-du c (walk-up i 0)))) 
+        (connect-du c (walk-up i 0))))
     (dl h headers)))
 
 ;; Knuths DLX algorithm and helpers
