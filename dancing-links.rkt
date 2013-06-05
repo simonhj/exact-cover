@@ -177,6 +177,17 @@
       #[0 1 0 0 0 0 1]   ;5
       #[0 0 0 1 1 0 1]]) ;6
 
+  (define EC2				;Has multiple solutions
+    #[ 
+      #['A 'B 'C 'D 'E 'F 'G]
+      #[1 1 1 1 1 1 1]
+      #[0 0 1 0 1 1 0]   ;1
+      #[1 0 0 1 0 0 1]   ;2
+      #[0 1 1 0 0 1 0]   ;3
+      #[1 0 0 1 0 0 0]   ;4
+      #[0 1 0 0 0 0 1]   ;5
+      #[0 0 0 1 1 0 1]]) ;6
+
   (define simple
     #[
       #['A 'B]
@@ -185,4 +196,7 @@
 
   (test-case "dlx-test"
     (check-equal? (list 1 2) (sort ((dlx (build-dl ((curry get-from-table) simple) 3 2))) <))
-    (check-equal? (list 1 4 5)  (sort ((dlx (build-dl ((curry get-from-table) EC1) 7 7))) <))))
+    (check-equal? (list 1 4 5)  (sort ((dlx (build-dl ((curry get-from-table) EC1) 7 7))) <))
+    (let ([mul (dlx (build-dl ((curry get-from-table) EC2) 8 7))])
+      (check-equal? (for/set ([s (in-producer mul (void))])
+		      (sort s <)) (set (list 2 5 6) (list 1))))))
