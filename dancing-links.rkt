@@ -163,19 +163,26 @@
 
 ;; Tests
 
-(define EC1
-  #[ 
-    #['A 'B 'C 'D 'E 'F 'G]
-     ;A B C D E F G
-    #[0 0 1 0 1 1 0]   ;1
-    #[1 0 0 1 0 0 1]   ;2
-    #[0 1 1 0 0 1 0]   ;3
-    #[1 0 0 1 0 0 0]   ;4
-    #[0 1 0 0 0 0 1]   ;5
-    #[0 0 0 1 1 0 1]]) ;6
+(module* test #f
 
-(define simple
-  #[
-    #['A 'B]
-    #[1   0]
-    #[0   1]])
+  (require rackunit)
+
+  (define EC1
+    #[ 
+      #['A 'B 'C 'D 'E 'F 'G]
+      #[0 0 1 0 1 1 0]   ;1
+      #[1 0 0 1 0 0 1]   ;2
+      #[0 1 1 0 0 1 0]   ;3
+      #[1 0 0 1 0 0 0]   ;4
+      #[0 1 0 0 0 0 1]   ;5
+      #[0 0 0 1 1 0 1]]) ;6
+
+  (define simple
+    #[
+      #['A 'B]
+      #[1   0]
+      #[0   1]])
+
+  (test-case "dlx-test"
+    (check-equal? (list 1 2) (sort ((dlx (build-dl ((curry get-from-table) simple) 3 2))) <))
+    (check-equal? (list 1 4 5)  (sort ((dlx (build-dl ((curry get-from-table) EC1) 7 7))) <))))
