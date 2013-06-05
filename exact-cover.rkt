@@ -6,7 +6,6 @@
 ;; Author: Simon Holm Jensen <simon@hjensen.net>
 
 (require racket/generator)
-(require rackunit)
 (require "dancing-links.rkt")
 
 (struct exact-cover-instance (dl-rep 	;Dancing links representation
@@ -67,6 +66,8 @@
 							     (loop (ec-sol)))]))))]))
 		  
 (module+ test
+
+  (require rackunit)
 
   (define A (set 1 4 7))
   (define B (set 1 4))
