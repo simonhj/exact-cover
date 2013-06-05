@@ -148,7 +148,7 @@
     (define (search k O)
       (if (eq? (data-right h) h)
           (yield (map data-row-idx O))
-          (let ([c (data-right h)])
+          (let ([c (choose-column)])
             (cover c)
             (for ([r (down c)])
               (for ([j (right r)])
