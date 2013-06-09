@@ -8,6 +8,12 @@
 (require racket/generator)
 (require "dancing-links.rkt")
 
+(provide 
+ make-exact-cover
+ solve-exact-cover
+ make-hitting-set
+ solve-hitting-set)
+
 (struct exact-cover-instance (dl-rep 	;Dancing links representation
 			      sets-mapping 	;Subsets of universe 
 			      universe-mapping)) ;All possible elements
@@ -62,13 +68,14 @@
 						     [(void? val) (void)]
 						     [else (begin
 							     (yield (list->set (set-map val (lambda (v)
-										   (hash-ref rm v)))))
+											      (hash-ref rm v)))))
 							     (loop (ec-sol)))]))))]))
 		  
 (module+ test
 
   (require rackunit)
 
+  ;; From the wikipedia example
   (define A (set 1 4 7))
   (define B (set 1 4))
   (define C (set 4 5 7))
@@ -80,4 +87,3 @@
   
   (check-equal? (set B D F) ((solve-exact-cover (make-exact-cover (set A B C D E F) U))))
   (check-equal? (set 1 2 5) ((solve-hitting-set (make-hitting-set (set A B C D E F) U)))))
-      
